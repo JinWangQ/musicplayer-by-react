@@ -1,6 +1,13 @@
 import React from 'react'
 import Header from './components/header'
 import Player from './page/player'
+import Musiclist from './page/musiclist'
+import {
+	Route,
+	Link,
+	HashRouter,
+	Switch
+} from 'react-router-dom'
 import {
 	MUSIC_LIST
 } from './config/musiclist'
@@ -10,6 +17,7 @@ class Root extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			musicList: MUSIC_LIST,
 			currentMusicItem: MUSIC_LIST[0]
 		};
 	}
@@ -31,14 +39,22 @@ class Root extends React.Component {
 	}
 
 	render() {
-		return (
-			<div>
-				<Header />
-				<Player currentMusicItem={this.state.currentMusicItem}></Player> 
-			</div>
 
+
+		return (
+			<HashRouter>
+				<section>
+					<Header/>
+					<Switch>
+	    				<Route exact path="/" render={() => <Player currentMusicItem={this.state.currentMusicItem}></Player> } />
+						<Route path="/list" render={() => <Musiclist musicList={this.state.musicList}></Musiclist> } />					
+					</Switch>
+				</section>
+			</HashRouter>
 		);
+
 	}
+
 }
 
 export default Root;
