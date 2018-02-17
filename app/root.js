@@ -11,6 +11,8 @@ import {
 import {
 	MUSIC_LIST
 } from './config/musiclist'
+import Pubsub from 'pubsub-js'
+
 
 
 class Root extends React.Component {
@@ -19,22 +21,72 @@ class Root extends React.Component {
 		this.state = {
 			musicList: MUSIC_LIST,
 			currentMusicItem: MUSIC_LIST[0]
+
 		};
 	}
+
+	playMusic(musicItem) {
+		$('#player').jPlayer('setMedia', {
+			mp3: musicItem.file
+		}).jPlayer('play');
+
+		this.setState({
+			currentMusicItem: musicItem
+		});
+	}
+
+	playNext(type = 'next') {
+		let index = this.findMusicIndex();
+		let newIndex = null;
+		let musicListLength = this.state.musicList.length;
+		if (type === 'next') {
+			newIndex = (index + 1) % musicListLength;
+		} else {
+			newIndex = (index - 1 + musicListLength) % musicListLength;
+		}
+
+		this.playMusic(this.state.musicList[newIndex]);
+	}
+	findMusicIndex() {
+		return this.state.musicList.indexOf(this.state.currentMusicItem);
+	}
+
 	componentDidMount() {
+
 		$("#player").jPlayer({
-			ready: function() {
-				$(this).jPlayer("setMedia", {
-					mp3: "http://jplayer.org/audio/mp3/Miaow-07-Bubble.mp3"
-				}).jPlayer('play');
-			},
 			supplied: "mp3",
 			wmode: "window",
 			useStateClassSkin: true
 		});
+
+		this.playMusic(this.state.currentMusicItem);
+		$("#player").bind($.jPlayer.event.ended, (e) => {
+			this.playNext();
+		});
+		Pubsub.subscribe('DELETE_MUSIC', (msg, musicItem) => {
+			this.setState({
+				musicList: this.state.musicList.filter(item => {
+					return item != musicItem;
+				})
+			});
+		});
+		Pubsub.subscribe('PLAY_MUSIC', (msg, musicItem) => {
+			this.playMusic(musicItem);
+		});
+		Pubsub.subscribe('PLAY_PREV', (msg, musicItem) => {
+			this.playNext('prev');
+		});
+		Pubsub.subscribe('PLAY_NEXT', (msg, musicItem) => {
+			this.playNext();
+		});
 	}
 
 	componentWillUnmount() {
+		Pubsub.unsubscribe('DELETE_MUSIC');
+		Pubsub.unsubscribe('PLAY_MUSIC');
+		$("player").unbind($.jPlayer.event.ended);
+		Pubsub.unsubscribe('PLAY_PREV');
+		Pubsub.unsubscribe('PLAY_NEXT');
 
 	}
 
