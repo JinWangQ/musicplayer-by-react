@@ -31,7 +31,7 @@ basic functions of a music player achieved.
 
 ### Key point
 1.  a React project built by webpack
-    *   React router
+    *   [React router](https://reacttraining.com/react-router/web/guides/philosophy)
         *   player page
         *   musiclist page
     *   react components:
@@ -45,3 +45,4 @@ basic functions of a music player achieved.
             *   cycle mode
         *   musiclist component (render musiclist)
 2.  Less
+3. [jPlayer](http://jplayer.org/)
