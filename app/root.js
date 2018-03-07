@@ -20,7 +20,8 @@ class Root extends React.Component {
 		super(props);
 		this.state = {
 			musicList: MUSIC_LIST,
-			currentMusicItem: MUSIC_LIST[0]
+			currentMusicItem: MUSIC_LIST[0],
+			cycleModel: 'cycle'
 
 		};
 	}
@@ -39,12 +40,23 @@ class Root extends React.Component {
 		let index = this.findMusicIndex();
 		let newIndex = null;
 		let musicListLength = this.state.musicList.length;
-		if (type === 'next') {
-			newIndex = (index + 1) % musicListLength;
-		} else {
-			newIndex = (index - 1 + musicListLength) % musicListLength;
-		}
+		switch (type) {
+			case 'cycle':
+				newIndex = (index + 1) % musicListLength;
+				break;
+			case 'once':
+				newIndex = index;
+				break;
+			case 'prev':
+				newIndex = (index - 1 + musicListLength) % musicListLength;
+				break;
+			case 'random':
+				newIndex = Math.round(Math.random() * musicListLength);
+				break;
+			default:
+				newIndex = (index + 1) % musicListLength;
 
+		}
 		this.playMusic(this.state.musicList[newIndex]);
 	}
 	findMusicIndex() {
@@ -60,8 +72,19 @@ class Root extends React.Component {
 		});
 
 		this.playMusic(this.state.currentMusicItem);
+
 		$("#player").bind($.jPlayer.event.ended, (e) => {
-			this.playNext();
+			switch (this.state.cycleModel) {
+				case 'cycle':
+					this.playNext('cycle');
+					break;
+				case 'once':
+					this.playNext('once');
+					break;
+				case 'random':
+					this.playNext('random');
+					break;
+			}
 		});
 		Pubsub.subscribe('DELETE_MUSIC', (msg, musicItem) => {
 			this.setState({
@@ -79,6 +102,14 @@ class Root extends React.Component {
 		Pubsub.subscribe('PLAY_NEXT', (msg, musicItem) => {
 			this.playNext();
 		});
+		Pubsub.subscribe('CHANGE_CYCLE_MODEL', (msg, musicItem) => {
+			const MODEL = ['cycle', 'once', 'random'];
+			let currentModel = MODEL.indexOf(this.state.cycleModel);
+			let newModel = (currentModel + 1) % 3;
+			this.setState({
+				cycleModel: MODEL[newModel]
+			});
+		});
 	}
 
 	componentWillUnmount() {
@@ -87,6 +118,7 @@ class Root extends React.Component {
 		$("player").unbind($.jPlayer.event.ended);
 		Pubsub.unsubscribe('PLAY_PREV');
 		Pubsub.unsubscribe('PLAY_NEXT');
+		Pubsub.unsubscribe('CHANGE_CYCLE_MODE');
 
 	}
 
@@ -98,7 +130,7 @@ class Root extends React.Component {
 				<section>
 					<Header/>
 					<Switch>
-	    				<Route exact path="/" render={() => <Player currentMusicItem={this.state.currentMusicItem}></Player> } />
+	    				<Route exact path="/" render={() => <Player cycleModel={this.state.cycleModel} currentMusicItem={this.state.currentMusicItem}></Player> } />
 						<Route path="/list" render={() => <Musiclist musicList={this.state.musicList}></Musiclist> } />					
 					</Switch>
 				</section>

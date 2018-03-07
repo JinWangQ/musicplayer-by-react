@@ -53,6 +53,7 @@ class Player extends React.Component {
 		// 	volume: progress * 100
 		// });
 	}
+	//for pause/play button
 	play() {
 		if (this.state.isPlay) {
 			$('#player').jPlayer('pause');
@@ -69,19 +70,31 @@ class Player extends React.Component {
 	playNext() {
 		Pubsub.publish('PLAY_NEXT');
 	}
+	changeCycleModel() {
+		Pubsub.publish('CHANGE_CYCLE_MODEL');
+	}
 
 	render() {
 		return (
 			<div className="player-page"> 
-				<h1 className="caption"><Link to="/list">My Music List &gt;</Link></h1>
+				<h1 className="caption">
+					<Link to="/list">My Music List &gt;</Link>
+				</h1>
                 <div className="mt20 row">
                 	<div className="controll-wrapper">
-                		<h2 className="music-title">{this.props.currentMusicItem.title}</h2>
-                		<h3 className="music-artist mt10">{this.props.currentMusicItem.artist}</h3>
+                		<h2 className="music-title">
+                			{this.props.currentMusicItem.title}
+                		</h2>
+                		<h3 className="music-artist mt10">
+                			{this.props.currentMusicItem.artist}
+                		</h3>
                 		<div className="row mt20">
                 			<div className="left-time -col-auto">-{this.state.leftTime}</div>
                 			<div className="volume-container">
-                				<i className="icon-volume rt" style={{top: 5, left: -5}}></i>
+                				<i className="icon-volume rt" style={{
+                					top: 5, 
+                					left: -5
+                				}}></i>
                 				<div className="volume-wrapper">
 					                <Progress
 										progress={this.state.volume}
@@ -91,7 +104,11 @@ class Player extends React.Component {
                 				</div>
                 			</div>
                 		</div>
-                		<div style={{height: 10, lineHeight: '10px', marginTop:10}}>
+                		<div style={{
+                			height: 10, 
+                			lineHeight: '10px', 
+                			marginTop:10
+                		}}>
 			                <Progress
 								progress={this.state.progress}
 								onProgressChange={this.progressChangeHandler}
@@ -105,12 +122,15 @@ class Player extends React.Component {
 	                			<i className="icon next ml20" onClick={this.playNext}></i>
                 			</div>
                 			<div className="-col-auto">
-                				<i className={`icon repeat-${this.props.repeatType}`} onClick={this.changeRepeat}></i>
+                				<i className={`icon repeat-${this.props.cycleModel}`} onClick={(this.changeCycleModel).bind(this)}></i>
                 			</div>
                 		</div>
                 	</div>
                 	<div className="-col-auto cover">
-                		<img src={this.props.currentMusicItem.cover} alt={this.props.currentMusicItem.title} />
+                		<img 
+                		src={this.props.currentMusicItem.cover} 
+                		alt={this.props.currentMusicItem.title} 
+                	/>
                 	</div>
                 </div>
 			</div>
