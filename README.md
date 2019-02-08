@@ -21,7 +21,7 @@ basic functions of a music player achieved.
     
 2. install dependencies
 
-    `cd react-music-player && npm install`
+    `cd musicplayer-by-react && npm install`
     
 3. Run
 
